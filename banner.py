@@ -1,24 +1,49 @@
 import random
+import pandas as pd
+
+def export_to_csv(new_column: list, column_name: str, file_name: str = "output.csv") -> None:
+    """Add or create a column in an existing CSV file."""
+    try:
+        df = pd.read_csv(file_name)
+        df[column_name] = new_column
+    except FileNotFoundError:
+        df = pd.DataFrame({column_name: new_column})
+
+    df.to_csv(file_name, index=False)
+    print(f"Column '{column_name}' exported to '{file_name}'")
+
+
+def convert_gap_records(l: list) -> list:
+    """Output records based on the pulls used between the occurance of each
+    six-star gained.
+    """
+    if not l:
+        return []
+
+    cur_pull = 0
+    records_gap = []
+    for pull_cnt in l:
+        records_gap.append(pull_cnt - cur_pull)
+        cur_pull = pull_cnt
+    return records_gap
+
 
 class Banner:
     """A class simulating a basic banner in Arknights.
 
     A basic banner has a basic six-star rate of 2%, and a pity-rule where:
      - If a six-star character does not appear in 50 continuous pulls, beginning
-     from the 51th pull, the rate of six-star increase by 2% each pull. (i.e. 
+     from the 51th pull, the rate of six-star increase by 2% each pull. (i.e.
      51th: 4%, 52th: 6%, etc.)
      - Once gained a six-star character, the rate returns to 2%.
-    
+
     Attributes:
-     - prob_6star: the probability of getting a six-star of the next pull.
-     - pity_counter_basic: pity counter for the basic pity rule.
      - pulls: current number of pulls used.
      - records: a list of integers containing the # of pulls of each six-star.
     """
-    
-    prob_desired: float
+
     pulls: int
-    records: list
+    records: list[int]
 
     def __init__(self) -> None:
         self.pulls = 0
@@ -31,67 +56,53 @@ class Banner:
 
     def _is_6star(self) -> bool:
         """Return True if this pull obtained a six-star character."""
-        if self.records:
-            pulls_since_last_6star = self.pulls - self.records[-1]
-        else:
-            pulls_since_last_6star = self.pulls
-        
+        pulls_since_last_6star = self.pulls - (self.records[-1] if self.records else 0)
+
         if pulls_since_last_6star <= 50:
             prob_6star = 0.02
         else:
             prob_6star = 0.02 + 0.02 * (pulls_since_last_6star - 50)
-        
+
         return random.random() < prob_6star
 
-        
     def pull_once(self) -> bool:
         """Make a pull!
-        
-        >>> banner = Banner()
-        >>> banner.pull_once()
-        False
-        >>> banner.pull_once()
-        True
+
+        Return True if the resulting character is a 6-star, and append the current
+        number of pulls to self.records.
         """
         self.pulls += 1
         # If got a six-star:
         if self._is_6star():
             self.records.append(self.pulls)
             return True
-        
+
         # Didn't get a six-star
         return False
-        
-    def pull_times(self, n: int) -> list:
-        """Make n pulls!"""
+
+    def pull_n_times(self, n: int) -> list:
+        """Make n pulls!
+
+        Return the result of pulls in a list[bool]."""
         for _ in range(n):
             self.pull_once()
         return self.records
-    
-    def pull_desired(self, n: int) -> list:
-        """Make pulls to get n desired characters!"""
+
+    def pull_n_desired(self, n:int) -> list:
+        """Make a number of pulls to get n desired characters.
+
+        In this case, pull n six-stars."""
         while len(self.records) < n:
             self.pull_once()
         return self.records
 
-    def convert_gap_records(self) -> list:
-        """Output records based on the pulls used between the occurance of each
-        six-star gained.
-        """
-        if not self.records:
-            return []
-        
-        cur_pull = 0
-        records_gap = []
-        for pull_cnt in self.records:
-            records_gap.append(pull_cnt - cur_pull)
-            cur_pull = pull_cnt
-        return records_gap
-
 if __name__ == '__main__':
-    random.seed(100)
+    random.seed(123)
     b = Banner()
-    for _ in range(5):
-        b.pull_desired(6)
-        print(b.convert_gap_records())
-        b.reset()
+    n_sample = 10000  # number of samples
+
+    b.pull_n_desired(n_sample)
+    results = convert_gap_records(b.records)
+    print(results)
+
+    export_to_csv(results, 'gap_between_6star.csv')
