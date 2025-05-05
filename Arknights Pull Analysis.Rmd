@@ -11,7 +11,7 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
-packages <- c("tidyverse", "latex2exp")
+packages <- c("tidyverse", "latex2exp", "ggplot2")
 lapply(packages, require, character.only = T)
 ```
 
@@ -64,7 +64,7 @@ simulate_6stars <- function(N) {
 # Example usage:
 seed <- 123
 set.seed(seed)
-results <- simulate_6stars(N = 10000)
+results <- simulate_6stars(N = 100000)
 
 # Look at the distribution:
 summary(results)
@@ -72,7 +72,44 @@ hist(results, breaks = 50, main = "Number of Pulls Needed for a 6 star",
      xlab = "Pulls", col = "skyblue")
 ```
 ```{r tmp}
-write.table(results, "vector.txt", row.names = FALSE, col.names = FALSE)
+# Initialize vectors
+x <- 1:99
+px <- numeric(99)  # probability of getting 6-star at each pull
+fail_prob <- 1     # cumulative probability of not getting 6-star yet
+
+# Phase 1: pulls 1 to 50
+for (i in 1:50) {
+  px[i] <- 0.02 * fail_prob
+  fail_prob <- fail_prob * 0.98
+}
+
+# Phase 2: pulls 51 to 98, increasing by 2% each time
+for (i in 51:98) {
+  pity_prob <- 0.02 * (i - 49)  # 0.04, 0.06, ..., 0.98
+  px[i] <- pity_prob * fail_prob
+  fail_prob <- fail_prob * (1 - pity_prob)
+}
+
+# Phase 3: guaranteed at 99
+px[99] <- fail_prob  # whatever remains
+
+# Expected value
+expected_value <- sum(x * px)
+expected_value
+
+# Create a data frame for plotting
+df <- data.frame(
+  pulls = x,
+  probability = px
+)
+
+# Plot the PMF
+ggplot(df, aes(x = pulls, y = probability)) +
+  geom_col(fill = "steelblue") +
+  labs(title = "PMF: Number of Pulls to Get 6-Star with Pity System",
+       x = "Number of Pulls",
+       y = "Probability") +
+  theme_minimal()
 ```
 以下是各个卡池的具体规则：
 
@@ -163,10 +200,38 @@ hist(results_standard, main = "Number of Pulls Needed for a 6 star",
 ```
  
 ## Data Preparation / 数据准备
+```{r}
+# Read the CSV file
+data <- read.csv("output.csv")
+
+# Clean column names (optional)
+colnames(data) <- make.names(colnames(data))
+
+# Choose the column to analyze
+target_col <- "Limited.Banner..1.1"
+```
 
 
 ```{r cars}
-summary(cars)
+
+# Basic statistics
+summary_stats <- data %>%
+  summarise(
+    Mean = mean(!!sym(target_col)),
+    Median = median(!!sym(target_col)),
+    Variance = var(!!sym(target_col)),
+    P90 = quantile(!!sym(target_col), 0.90),
+    Max = max(!!sym(target_col)),
+    Min = min(!!sym(target_col))
+  )
+
+print(summary_stats)
+
+# Histogram
+ggplot(data, aes_string(x = target_col)) +
+  geom_histogram(binwidth = 20, fill = "skyblue", color = "black") +
+  theme_minimal() +
+  labs(title = "Histogram", x = target_col, y = "Count")
 ```
 
 ## Data Analysis / 数据分析

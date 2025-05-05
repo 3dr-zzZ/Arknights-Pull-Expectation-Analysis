@@ -1,31 +1,4 @@
 import random
-import pandas as pd
-
-def export_to_csv(new_column: list, column_name: str, file_name: str = "output.csv") -> None:
-    """Add or create a column in an existing CSV file."""
-    try:
-        df = pd.read_csv(file_name)
-        df[column_name] = new_column
-    except FileNotFoundError:
-        df = pd.DataFrame({column_name: new_column})
-
-    df.to_csv(file_name, index=False)
-    print(f"Column '{column_name}' exported to '{file_name}'")
-
-
-def convert_gap_records(l: list) -> list:
-    """Output records based on the pulls used between the occurance of each
-    six-star gained.
-    """
-    if not l:
-        return []
-
-    cur_pull = 0
-    records_gap = []
-    for pull_cnt in l:
-        records_gap.append(pull_cnt - cur_pull)
-        cur_pull = pull_cnt
-    return records_gap
 
 
 class Banner:
@@ -88,7 +61,7 @@ class Banner:
             self.pull_once()
         return self.records
 
-    def pull_n_desired(self, n:int) -> list:
+    def pull_n_desired(self, n: int) -> list:
         """Make a number of pulls to get n desired characters.
 
         In this case, pull n six-stars."""
@@ -97,12 +70,4 @@ class Banner:
         return self.records
 
 if __name__ == '__main__':
-    random.seed(123)
-    b = Banner()
-    n_sample = 10000  # number of samples
-
-    b.pull_n_desired(n_sample)
-    results = convert_gap_records(b.records)
-    print(results)
-
-    export_to_csv(results, 'gap_between_6star.csv')
+    pass

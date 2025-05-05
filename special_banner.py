@@ -1,5 +1,5 @@
 import random
-from banner import Banner, export_to_csv
+from banner import Banner
 
 class SpecialBanner(Banner):
     """A class for the Special Banner.
@@ -47,22 +47,11 @@ class SpecialBanner(Banner):
 
         return is_6star
 
-    def pull_n_desired(self, n) -> list:
+    def pull_n_desired(self, n: int) -> list:
         """Make a number of pulls to get n rate-up characters."""
         while len(self.records_rate_up) < n:
             self.pull_once()
         return self.records_rate_up
 
 if __name__ == "__main__":
-    random.seed(123)
-    b = SpecialBanner()
-    n_sample = 10000  # number of samples
-    n_rate_up = 6  # the number of rate-up characters from each sample.
-
-    results = []
-    for _ in range(n_sample):
-        results.append(max(b.pull_n_desired(n_rate_up)))
-        b.reset()
-    print(results)
-
-    export_to_csv(results, "Special Banner: 6 desired")
+    pass
