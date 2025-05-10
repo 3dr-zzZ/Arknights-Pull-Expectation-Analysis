@@ -3,6 +3,8 @@ import pandas as pd
 from banner import Banner
 from special_banner import SpecialBanner
 from limited_banner import LimitedBanner
+from standard_banner import StandardBanner
+
 
 def export_to_csv(new_column: list, column_name: str, file_name: str = "output.csv") -> None:
     """Add or create a column in an existing CSV file."""
@@ -36,8 +38,11 @@ if __name__ == '__main__':
     n_sample = 10000  # number of samples
     n_rate_up = 1  # the number of rate-up operators from each sample.
     m_rate_up = 1  # if there are two rate-up operators.
+    if n_rate_up == 0 and m_rate_up == 0:
+        print("Does not apply: please get at least 1 main/peipao operator.")
+
     # Choose the banner:
-    b = LimitedBanner()
+    b = StandardBanner()
 
     # Simulate
     results = []
@@ -45,11 +50,16 @@ if __name__ == '__main__':
         if isinstance(b, SpecialBanner):
             results.append(b.pull_n_desired(n_rate_up)[-1])
         else:
-            results.append(max(b.pull_desired(n_rate_up, m_rate_up)[0][-1],
-                               b.pull_desired(n_rate_up, m_rate_up)[1][-1]))
+            pulls = b.pull_desired(n_rate_up, m_rate_up)
+            if m_rate_up > 0 and n_rate_up > 0:
+                results.append(max(pulls[0][-1], pulls[1][-1]))
+            elif n_rate_up > 0:
+                results.append(pulls[0][-1])
+            elif m_rate_up > 0:
+                results.append(pulls[1][-1])
         b.reset()
     print(results)
 
     # Export
-    col_name = 'Limited Banner: 1+1'
-    export_to_csv(results, col_name)
+    col_name = 'Standard Banner: 1+1'
+    # export_to_csv(results, col_name)

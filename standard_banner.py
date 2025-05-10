@@ -13,8 +13,65 @@ class StandardBanner(Banner):
     other rate-up character.
 
     Attributes:
-
-
+    - records_main: A list of integers indicating the pull numbers where
+    the main operator (could be traded with the yellow-ticket) was obtained.
+    - records_peipao: A list of integers indicating the pull numbers where
+    the peipao operator was obtained.
+    - pity1_used: True if the pity rule 1 (the guarantee of 150 pulls) is used.
+    - pity2_used: True if the pity rule 2 (the guarantee of 150 pulls) is used.
+    - pity1_is_main: True if the pity rule 1 results in the main operator.
     """
-    def __init__(self):
+    records_main: list[int]
+    records_peipao: list[int]
+    pity1_used: bool
+    pity2_used: bool
+    pity1_is_main: None|bool
+
+    def __init__(self) -> None:
         super().__init__()
+        self.records_main = []
+        self.records_peipao = []
+        self.pity1_used = False
+        self.pity2_used = False
+        self.pity1_is_main = None
+
+    def reset(self) -> None:
+        super().reset()
+        self.records_main = []
+        self.records_peipao = []
+        self.pity1_used = False
+        self.pity2_used = False
+        self.pity1_is_main = None
+
+    def pull_once(self) -> bool:
+        is_6star = super().pull_once()
+        if is_6star:
+            if 150 <= self.pulls < 300 and self.pity1_used == False:
+                if random.random() < 0.5:
+                    self.records_main.append(self.pulls)
+                    self.pity1_is_main = True
+                else:
+                    self.records_peipao.append(self.pulls)
+                    self.pity1_is_main = False
+                self.pity1_used = True
+            elif self.pulls >= 300 and self.pity2_used == False:
+                if self.pity1_is_main:
+                    self.records_peipao.append(self.pulls)
+                else:
+                    self.records_main.append(self.pulls)
+                self.pity2_used = True
+            else:
+                if random.random() < 0.5:
+                    self.records_main.append(self.pulls)
+                else:
+                    self.records_peipao.append(self.pulls)
+        return is_6star
+
+    def pull_desired(self, n: int, m: int) -> tuple[list[int], list[int]]:
+        """Pull n main operator(s) and m peipao operator(s)"""
+        while len(self.records_main) < n or len(self.records_peipao) < m:
+            self.pull_once()
+        return self.records_main, self.records_peipao
+
+if __name__ == "__main__":
+    pass

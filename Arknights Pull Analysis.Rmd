@@ -201,37 +201,30 @@ hist(results_standard, main = "Number of Pulls Needed for a 6 star",
  
 ## Data Preparation / 数据准备
 ```{r}
-# Read the CSV file
+# load the data
 data <- read.csv("output.csv")
-
-# Clean column names (optional)
-colnames(data) <- make.names(colnames(data))
-
-# Choose the column to analyze
-target_col <- "Limited.Banner..1.1"
 ```
 
 
 ```{r cars}
+# compute summary statistics row-wise for each column
+summary_table <- data %>%
+  summarise(across(
+    where(is.numeric),
+    list(
+      mean = mean,
+      median = median,
+      variance = var,
+      p90 = ~quantile(.x, 0.9),
+      max = max,
+      min = min
+    ),
+    .names = "{.col}__{.fn}"
+  )) %>%
+  pivot_longer(everything(), names_to = c("col_name", "stat"), names_sep = "__") %>%
+  pivot_wider(names_from = stat, values_from = value)
 
-# Basic statistics
-summary_stats <- data %>%
-  summarise(
-    Mean = mean(!!sym(target_col)),
-    Median = median(!!sym(target_col)),
-    Variance = var(!!sym(target_col)),
-    P90 = quantile(!!sym(target_col), 0.90),
-    Max = max(!!sym(target_col)),
-    Min = min(!!sym(target_col))
-  )
-
-print(summary_stats)
-
-# Histogram
-ggplot(data, aes_string(x = target_col)) +
-  geom_histogram(binwidth = 20, fill = "skyblue", color = "black") +
-  theme_minimal() +
-  labs(title = "Histogram", x = target_col, y = "Count")
+print(summary_table)
 ```
 
 ## Data Analysis / 数据分析
