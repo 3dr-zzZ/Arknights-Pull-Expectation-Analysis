@@ -33,16 +33,16 @@ def convert_gap_records(l: list) -> list:
     return records_gap
 
 if __name__ == '__main__':
-    # Basic setup
+    ############### Basic Setup ###############
     random.seed(123)
     n_sample = 10000  # number of samples
-    n_rate_up = 1  # the number of rate-up operators from each sample.
-    m_rate_up = 1  # if there are two rate-up operators.
+
+    ### Choose Banner & Num of Character(s) ###
+    b = LimitedBanner()
+    n_rate_up = 1  # num of rate-up operators from each sample.
+    m_rate_up = 1  # num of second character if two rate-up operators.
     if n_rate_up == 0 and m_rate_up == 0:
         print("Does not apply: please get at least 1 main/peipao operator.")
-
-    # Choose the banner:
-    b = StandardBanner()
 
     # Simulate
     results = []
@@ -61,5 +61,9 @@ if __name__ == '__main__':
     print(results)
 
     # Export
-    col_name = 'Standard Banner: 1+1'
-    # export_to_csv(results, col_name)
+    if isinstance(b, SpecialBanner):
+        col_name = f'{type(b).__name__}({n_rate_up})'
+    else:
+        col_name = f'{type(b).__name__}({n_rate_up}+{m_rate_up})'
+    print(col_name)
+    export_to_csv(results, col_name)
