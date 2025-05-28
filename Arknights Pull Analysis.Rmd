@@ -16,61 +16,66 @@ lapply(packages, require, character.only = T)
 ```
 
 ## Introduction / 引言
-This document analysis the pull expectation from a popular gacha game, Arknights, by (using statistical tools, performing data analysis), aiming to assist doctors (players) to better make decisions about pulling and distributing pulling resources.
+This analysis investigates the pull expectation from a popular gacha game, Arknights, by (using statistical tools, performing data analysis), aiming to assist Doctors (i.e. the players) with statistical evidence to better make decisions about whether to pull or save.
 
-本分析出于作者兴趣，旨在对《明日方舟》的抽卡期望进行较为严谨的分析，以帮助各位博士（玩家）做出合理的抽卡决定、规划抽卡资源的分配。
+本分析出于作者兴趣，旨在对《明日方舟》的抽卡期望进行较为严谨的统计学分析，以帮助各位博士（玩家）做出合理的抽卡决定、规划抽卡资源。
 
-## Pulling mechanisms  / 卡池机制
-There are different types of 
-《明日方舟》中存在着许多不同的卡池（即“干员寻访”），每个卡池的up机制（即”干员寻访概率提升“）和保底规则有着细微差异，但每个卡池均遵循同样的**干员出现概率**和**概率提升机制**，即：
+To be specific, this analysis will try to answer these questions:
+  1. Which kind of banner is the best to get the desired operator(s).
+  2. How many pulls does it take.
+Being able to answer these questions gives a clear guidance on questions like "Should I use the (六星干员自选券) on the operator or should I pull it?", "How many resources should I have in hand to get the desired operator?", which are small however importance for the players.
 
-  **1. 稀有度和出现概率：**6星：2.00%、5星：8.00%、4星：50.00%、3星：40.00%；
-  
-  **2. 概率提升机制：**如果连续50次没有获得6星干员，则每次提高2%获得6星干员的概率，直到获得一位六星干员时恢复到2%。
+【中文翻译】
 
-由此，我们可以通过程序模拟抽卡过程，并记录下每次获得六星干员的间隔抽数:
+Note that, I'm also planning to develop a simulation tool with GUI so that users not familiar with coding can also freely adjust the banner type, the number of operators (and more!), getting results for all kinds of simulations for a broader use. But right now if u can and like, feel free to play with the codes on Github to get some results interested.
+
+【中文翻译】
+
+
+## Data Preparation / 数据准备
+卡池通过Python程序模拟。在'main.py'中可调整模拟次数，卡池种类，所需六星干员数量，并将结果输出到'output.csv'文件中。
+
+目前模拟包含以下卡池：
+ - **常驻标准寻访/中坚寻访**
+ - **SideStory/故事集寻访**
+ - **限定寻访**
+ 
 ```{r}
-# Simulate pulls needed for N 6-star characters under Arknights pity mechanics
-simulate_6stars <- function(N) {
-  pulls_needed <- numeric(N)  # A vector to store pulls needed for each 6-star
-  
-  for (i in seq_len(N)) {
-    pity_counter <- 0  # Number of pulls since last 6-star
-    
-    while (TRUE) {
-      # Determine probability of 6-star on this pull
-      if (pity_counter < 50) {
-        prob_6star <- 0.02
-      } else {
-        # After 50 pulls, rate increases by 2% per pull
-        prob_6star <- 0.02 + 0.02 * (pity_counter - 50)
-      }
-      
-      # Simulate Bernoulli trial using runif()
-      # If runif(1) < probability, it means we got a 6-star
-      if (runif(1) < prob_6star) {
-        pity_counter <- pity_counter + 1
-        pulls_needed[i] <- pity_counter
-        # Reset pity and stop this loop since we got a 6-star
-        break
-      } else {
-        pity_counter <- pity_counter + 1
-      }
-    }
-  }
-  return(pulls_needed)
-}
-
-# Example usage:
-seed <- 123
-set.seed(seed)
-results <- simulate_6stars(N = 100000)
-
-# Look at the distribution:
-summary(results)
-hist(results, breaks = 50, main = "Number of Pulls Needed for a 6 star",
-     xlab = "Pulls", col = "skyblue")
+# load the data
+data <- read.csv("output.csv")
+data %>% colnames()
 ```
+
+
+```{r cars}
+# compute summary statistics row-wise for each column
+summary_table <- data %>%
+  summarise(across(
+    where(is.numeric),
+    list(
+      mean = mean,
+      median = median,
+      # variance = var,
+      p90 = ~quantile(.x, 0.9),
+      max = max,
+      min = min
+    ),
+    .names = "{.col}__{.fn}"
+  )) %>%
+  pivot_longer(everything(), names_to = c("col_name", "stat"), names_sep = "__") %>%
+  pivot_wider(names_from = stat, values_from = value)
+
+print(summary_table)
+```
+
+## Data Analysis / 数据分析
+
+
+## Appendix: PMF of Six-Star Character / 附录：六星角色的概率质量分布
+Besides, we can also use a parcial geometric distribution to model the probability of getting a six-star character in all banners. This allow as to find the true value of the parameter of interest. 
+Maybe we can investigate other banners using the PMF approach as well, but it will be much more complicated than Python simulations and I am lazy. Perhaps we can give it a try in the future.
+
+此外，在所有卡池中六星干员的出率分布也可以通过
 ```{r tmp}
 # Initialize vectors
 x <- 1:99
@@ -111,128 +116,4 @@ ggplot(df, aes(x = pulls, y = probability)) +
        y = "Probability") +
   theme_minimal()
 ```
-以下是各个卡池的具体规则：
 
- - **常驻标准寻访/中坚寻访：**1.两名六星干员获得概率提升（占六星出率的50%）。2.累计寻访150次后，下一次招募到的六星干员必定为当期出率上升的六星干员之一；累计寻访300次后，下一次招募到的六星干员必定为当期出率上升的另一名六星干员。
- 
- - **SideStory/故事集寻访：**1.一名六星干员获得概率提升（占六星出率的50%）。2.如果连续150次没有获得该限时寻访中出率上升的六星干员，则下一次招募到的六星干员必定为该限时寻访中出率上升的六星干员。该机制在当期寻访中仅生效一次。
- 
- - **限定寻访：**1.两名六星干员获得概率提升（占六星出率的75%）。2.按实装时间排序，更晚加入的三名同类限定干员获得出率权重提升：获得的六星干员不是当期出率提升的干员的场合，获得这三名限定的干员变为获得其他干员的五倍。3.累计寻访300次，额外赠送一份当期限定干员的简历（仅限一次）。
- 
- - **联动寻访：**1.前120次寻访必定能够获得联动六星干员，仅限一次。
- 
- - **联合行动：**1.其中可能出现的六星干员有且仅有4名本期特选的干员，即每名六星干员出率占六星出率的25%
-
-由此，我们可以通过程序模拟抽卡过程，并记录下每次获得想要六星干员的间隔抽数:
-```{r}
-simulate_standard_pity <- function(x) {
-  # x: a numeric vector from simulate_6stars, where x[i] = pulls until the i-th 6★ in that simulation
-
-  # We'll store how many cumulative pulls have happened when each 6★ arrives
-  pulls_needed <- numeric(length(x))
-
-  # Track overall progress
-  total_pulls <- 0
-  
-  # Track whether you've obtained each of the rate-up 6★s
-  gotA <- FALSE
-  gotB <- FALSE
-  
-  # Track whether the pity thresholds (150 and 300) have been used
-  pity150_used <- FALSE
-  pity300_used <- FALSE
-
-  for (i in seq_along(x)) {
-    # Add the pulls needed to reach this i-th 6★
-    total_pulls <- total_pulls + x[i]
-    
-    # 1) Check if we can apply the 300-pull pity rule
-    #    "If cumulated pulls >= 300 and we have exactly one rate-up, 
-    #     the next 6★ must be the other one"
-    if (!pity300_used && total_pulls >= 300 && xor(gotA, gotB)) {
-      # If we have exactly one rate-up, force the other
-      if (gotA) {
-        gotB <- TRUE
-      } else {
-        gotA <- TRUE
-      }
-      pity300_used <- TRUE
-    
-    # 2) Else check if we can apply the 150-pull pity rule
-    #    "If cumulated pulls >= 150, the next 6★ must be one of the two rate-ups
-    #     with 50% chance each"
-    } else if (!pity150_used && total_pulls >= 150 && (!gotA || !gotB)) {
-      if (runif(1) < 0.5) {
-        gotA <- TRUE
-      } else {
-        gotB <- TRUE
-      }
-      pity150_used <- TRUE
-    
-    # 3) Otherwise, use the regular distribution
-    #    25% for each rate-up (total 50%), 50% off-rate
-    } else {
-      r <- runif(1)
-      if (r < 0.25) {
-        gotA <- TRUE
-      } else if (r < 0.50) {
-        gotB <- TRUE
-      } 
-      # else: it's a non-rate-up 6★, so do nothing
-    }
-
-    # Record how many pulls had happened when we got this 6★
-    pulls_needed[i] = total_pulls
-  }
-  
-  return(pulls_needed)
-}
-
-# Example usage
-seed <- 123
-set.seed(seed)
-results_standard <- simulate_standard(results)
-
-# Look at the distribution:
-summary(results_standard)
-hist(results_standard, main = "Number of Pulls Needed for a 6 star",
-     xlab = "Pulls", col = "skyblue")
-```
- 
-## Data Preparation / 数据准备
-```{r}
-# load the data
-data <- read.csv("output.csv")
-```
-
-
-```{r cars}
-# compute summary statistics row-wise for each column
-summary_table <- data %>%
-  summarise(across(
-    where(is.numeric),
-    list(
-      mean = mean,
-      median = median,
-      variance = var,
-      p90 = ~quantile(.x, 0.9),
-      max = max,
-      min = min
-    ),
-    .names = "{.col}__{.fn}"
-  )) %>%
-  pivot_longer(everything(), names_to = c("col_name", "stat"), names_sep = "__") %>%
-  pivot_wider(names_from = stat, values_from = value)
-
-print(summary_table)
-```
-
-## Data Analysis / 数据分析
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
