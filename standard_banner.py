@@ -74,4 +74,13 @@ class StandardBanner(Banner):
         return self.records_main, self.records_peipao
 
 if __name__ == "__main__":
-    pass
+    random.seed(123)
+    b = StandardBanner()
+    n = 6
+    m = 3
+    records = b.pull_desired(n, m)
+    print(f"在标准池中，抽到至少{n}个进店干员 + {m}个陪跑干员需要{max(records[0][-1], records[1][-1])}抽。")
+    print(f"进店干员出现在：")
+    print(records[0])
+    print(f"陪跑干员出现在：")
+    print(records[1])

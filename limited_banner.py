@@ -45,10 +45,24 @@ class LimitedBanner(Banner):
         return is_6star
 
     def pull_desired(self, n: int, m: int) -> tuple[list[int], list[int]]:
-        """Pull n limited operators and m peipao operators."""
+        """Pull n limited operators and m peipao operators.
+
+        Note: there might be more than n limited operators or more than m peipao
+        operators in the records, as the simulation stops when reaching *both*
+        number requirements.
+        """
         while len(self.records_limited) < n or len(self.records_peipao) < m:
             self.pull_once()
         return self.records_limited, self.records_peipao
 
 if __name__ == "__main__":
-    pass
+    random.seed(123)
+    b = LimitedBanner()
+    n = 6
+    m = 3
+    records = b.pull_desired(n, m)
+    print(f"在限定池中，抽到至少{n}个限定干员 + {m}个陪跑干员需要{max(records[0][-1], records[1][-1])}抽。")
+    print(f"限定干员出现在：")
+    print(records[0])
+    print(f"陪跑干员出现在：")
+    print(records[1])

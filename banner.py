@@ -70,4 +70,14 @@ class Banner:
         return self.records
 
 if __name__ == '__main__':
-    pass
+    random.seed(123)
+    b = Banner()
+    for i in range(20):
+        print(f"第{i + 1}抽出现六星：", b.pull_once())
+    print(b.records)
+    b.reset()
+
+    n = 3
+    b.pull_n_desired(n)
+    print(f"{n}个六星出现的抽数：")
+    print(b.records)

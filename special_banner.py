@@ -34,7 +34,7 @@ class SpecialBanner(Banner):
     def pull_once(self) -> bool:
         """Make one pull.
 
-        Return True if results in a six-star."""
+        Return True if results is the rate-up character."""
         is_6star = super().pull_once()
         if is_6star:
             pulls_since_last_rate_up = self.pulls - (self.records_rate_up[-1] if self.records_rate_up else 0)
@@ -44,8 +44,9 @@ class SpecialBanner(Banner):
                 self.records_rate_up.append(self.pulls)
                 if guaranteed_rate_up:
                     self.pity_used = True
+                return True
 
-        return is_6star
+        return False
 
     def pull_n_desired(self, n: int) -> list:
         """Make a number of pulls to get n rate-up characters."""
@@ -54,4 +55,9 @@ class SpecialBanner(Banner):
         return self.records_rate_up
 
 if __name__ == "__main__":
-    pass
+    random.seed(123)
+    n = 15
+    b = SpecialBanner()
+    b.pull_n_desired(n)
+    print(f"在单up池中{n}个up干员出现的抽数：")
+    print(b.records)
