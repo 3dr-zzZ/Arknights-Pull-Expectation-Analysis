@@ -38,9 +38,9 @@ if __name__ == '__main__':
     n_sample = 10000  # number of samples
 
     ### Choose Banner & Num of Character(s) ###
-    b = LimitedBanner()
+    b = StandardBanner()
     n_rate_up = 1  # num of rate-up operators from each sample.
-    m_rate_up = 1  # num of second character if two rate-up operators.
+    m_rate_up = 0  # num of second character if two rate-up operators.
     if n_rate_up == 0 and m_rate_up == 0:
         print("Does not apply: please get at least 1 main/peipao operator.")
 
