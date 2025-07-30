@@ -32,17 +32,27 @@ def convert_gap_records(l: list) -> list:
         cur_pull = pull_cnt
     return records_gap
 
-if __name__ == '__main__':
-    ############### Basic Setup ###############
-    random.seed(123)
-    n_sample = 10000  # number of samples
-
-    ### Choose Banner & Num of Character(s) ###
-    b = StandardBanner()
-    n_rate_up = 1  # num of rate-up operators from each sample.
-    m_rate_up = 0  # num of second character if two rate-up operators.
+def simulate(banner_type: str, n_sample: int, n_rate_up: int, m_rate_up: int = 0,
+             sort: bool = False, to_csv: bool = False, file_name: str = "output.csv") -> list:
+    """Make simulations with banner_type banner, aim to get n_rate_up main
+    operator(s) and m_rate_up peipao operator(s) if any. If sort = True, the
+    result will be sorted in ascending order. When to_csv = True, results will
+    be exported to file_name.
+    """
+    types = ["Special banner", "Limited banner", "Standard banner"]
+    if banner_type not in types:
+        raise ValueError(f"Banner type {banner_type} does not exist.")
     if n_rate_up == 0 and m_rate_up == 0:
-        print("Does not apply: please get at least 1 main/peipao operator.")
+        raise ValueError("Does not apply: please get at least 1 "
+                         "main/peipao operator.")
+
+    # Initialize the banner.
+    if banner_type == "Special banner":
+        b = SpecialBanner()
+    elif banner_type == "Limited banner":
+        b = LimitedBanner()
+    elif banner_type == "Standard banner":
+        b = StandardBanner()
 
     # Simulate
     results = []
@@ -58,12 +68,30 @@ if __name__ == '__main__':
             elif m_rate_up > 0:
                 results.append(pulls[1][-1])
         b.reset()
-    print(results)
+
+    if sort:
+        results.sort()
 
     # Export
-    if isinstance(b, SpecialBanner):
-        col_name = f'{type(b).__name__}({n_rate_up})'
-    else:
-        col_name = f'{type(b).__name__}({n_rate_up}+{m_rate_up})'
-    print(col_name)
-    export_to_csv(results, col_name)
+    if to_csv:
+        if isinstance(b, SpecialBanner):
+            col_name = f'{type(b).__name__}({n_rate_up})'
+        else:
+            col_name = f'{type(b).__name__}({n_rate_up}+{m_rate_up})'
+        print(col_name)
+        export_to_csv(results, col_name, file_name)
+
+    return results
+
+if __name__ == '__main__':
+    ############### Basic Setup ###############
+    random.seed(123)
+    banner_types = ["Special banner", "Limited banner", "Standard banner"]
+
+    sample = 10000
+    n = 1  # number of main operators
+    m = 0  # number of peipao operators
+    ###########################################
+
+    result = simulate(banner_types[1], sample, n, m, sort = True)
+    print(result)
