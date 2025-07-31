@@ -1,5 +1,7 @@
 import random
 import pandas as pd
+import numpy as np
+
 from banner import Banner
 from special_banner import SpecialBanner
 from limited_banner import LimitedBanner
@@ -31,6 +33,21 @@ def convert_gap_records(l: list) -> list:
         records_gap.append(pull_cnt - cur_pull)
         cur_pull = pull_cnt
     return records_gap
+
+
+def summarize(input_list: list[int]) -> dict:
+    """Given an input_list, output its min, max, mean, median, and 90th
+    percentile in a dictionary.
+    """
+    data = np.array(input_list)
+    rslt = {
+        "min": np.min(data),
+        "max": np.max(data),
+        "mean": np.mean(data),
+        "median": np.median(data),
+        "p90": np.percentile(data, 90)
+    }
+    return rslt
 
 def simulate(banner_type: str, n_sample: int, n_rate_up: int, m_rate_up: int = 0,
              sort: bool = False, to_csv: bool = False, file_name: str = "output.csv") -> list:
@@ -95,3 +112,4 @@ if __name__ == '__main__':
 
     result = simulate(banner_types[1], sample, n, m, sort = True)
     print(result)
+    print(summarize(result))
