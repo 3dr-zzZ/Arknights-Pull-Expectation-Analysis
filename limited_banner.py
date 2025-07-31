@@ -33,10 +33,12 @@ class LimitedBanner(Banner):
 
     def pull_once(self) -> bool:
         is_6star = super().pull_once()
+
+        # 300th gifted
+        if self.pulls == 300:
+            self.records_limited.append(300)
+
         if is_6star:
-            # pity-rule
-            if self.pulls == 300:
-                self.records_limited.append(300)
             if random.random() < 0.7:
                 if random.random() < 0.5:
                     self.records_limited.append(self.pulls)
@@ -58,8 +60,8 @@ class LimitedBanner(Banner):
 if __name__ == "__main__":
     random.seed(123)
     b = LimitedBanner()
-    n = 6
-    m = 3
+    n = 1
+    m = 1
     records = b.pull_desired(n, m)
     print(f"在限定池中，抽到至少{n}个限定干员 + {m}个陪跑干员需要{max(records[0][-1], records[1][-1])}抽。")
     print(f"限定干员出现在：")
