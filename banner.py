@@ -69,6 +69,22 @@ class Banner:
             self.pull_once()
         return self.records
 
+
+def convert_gap_records(l: list) -> list:
+    """Output records based on the pulls used between the occurance of each
+    six-star gained.
+    """
+    if not l:
+        return []
+
+    cur_pull = 0
+    records_gap = []
+    for pull_cnt in l:
+        records_gap.append(pull_cnt - cur_pull)
+        cur_pull = pull_cnt
+    return records_gap
+
+
 if __name__ == '__main__':
     random.seed(123)
     b = Banner()

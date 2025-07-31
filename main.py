@@ -1,6 +1,9 @@
 import random
+import time
+
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 
 from banner import Banner
 from special_banner import SpecialBanner
@@ -10,6 +13,7 @@ from tqdm import trange
 
 def export_to_csv(new_column: list, column_name: str, file_name: str = "output.csv") -> None:
     """Add or create a column in an existing CSV file."""
+    print()
     try:
         df = pd.read_csv(file_name)
         df[column_name] = new_column
@@ -18,21 +22,6 @@ def export_to_csv(new_column: list, column_name: str, file_name: str = "output.c
 
     df.to_csv(file_name, index=False)
     print(f"Column '{column_name}' exported to '{file_name}'")
-
-
-def convert_gap_records(l: list) -> list:
-    """Output records based on the pulls used between the occurance of each
-    six-star gained.
-    """
-    if not l:
-        return []
-
-    cur_pull = 0
-    records_gap = []
-    for pull_cnt in l:
-        records_gap.append(pull_cnt - cur_pull)
-        cur_pull = pull_cnt
-    return records_gap
 
 
 def summarize(input_list: list[int]) -> dict:
@@ -45,9 +34,21 @@ def summarize(input_list: list[int]) -> dict:
         "max": np.max(data),
         "mean": np.mean(data),
         "median": np.median(data),
+        "p75":np.percentile(data, 75),
         "p90": np.percentile(data, 90)
     }
+    for key in rslt.keys():
+        print(f"{key}: {rslt[key]}")
     return rslt
+
+
+def plot_histogram(input_list: list[int]) -> None:
+    """Create a histogram about input_list.
+    """
+    plt.hist(input_list, bins = 30)
+    plt.xlabel("Number of pulls")
+    plt.ylabel("Count")
+    plt.show()
 
 def simulate(banner_type: str, n_sample: int, n_rate_up: int, m_rate_up: int = 0,
              sort: bool = False, to_csv: bool = False, file_name: str = "output.csv") -> list:
@@ -66,13 +67,17 @@ def simulate(banner_type: str, n_sample: int, n_rate_up: int, m_rate_up: int = 0
     # Initialize the banner.
     if banner_type == "Special banner":
         b = SpecialBanner()
+        print(f"开始模拟「特殊寻访」，抽取「{n_rate_up}」个up干员，样本量：{n_sample}。")
     elif banner_type == "Limited banner":
         b = LimitedBanner()
+        print(f"开始模拟「限定寻访」，抽取至少「{n_rate_up}」个限定干员、「{m_rate_up}」个陪跑干员，样本量：{n_sample}。")
     elif banner_type == "Standard banner":
         b = StandardBanner()
+        print(f"开始模拟「标准寻访」，抽取至少「{n_rate_up}」个进店干员、「{m_rate_up}」个陪跑干员，样本量：{n_sample}。")
 
     # Simulate
     results = []
+    t0 = time.time()
     for _ in trange(n_sample):
         if isinstance(b, SpecialBanner):
             results.append(b.pull_n_desired(n_rate_up)[-1])
@@ -85,6 +90,7 @@ def simulate(banner_type: str, n_sample: int, n_rate_up: int, m_rate_up: int = 0
             elif m_rate_up > 0:
                 results.append(pulls[1][-1])
         b.reset()
+    print(f"模拟完成，耗时：{round(time.time() - t0, 2)}s。")
 
     if sort:
         results.sort()
@@ -106,10 +112,15 @@ if __name__ == '__main__':
     banner_types = ["Special banner", "Limited banner", "Standard banner"]
 
     sample = 100000
-    n = 1  # number of main operators
-    m = 0  # number of peipao operators
+    n = 2  # number of main operators
+    m = 1  # number of peipao operators
     ###########################################
 
-    result = simulate(banner_types[1], sample, n, m, sort = True)
-    print(result)
-    print(summarize(result))
+    result = simulate(banner_types[1], sample, n, m)
+    # print(result)
+    summarize(result)
+    # plot_histogram(result)
+
+    # for i in range(6):
+    #     result = simulate(banner_types[0], sample, i+1)
+    #     summarize(result)
