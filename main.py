@@ -4,7 +4,7 @@ from banner import Banner
 from special_banner import SpecialBanner
 from limited_banner import LimitedBanner
 from standard_banner import StandardBanner
-
+from tqdm import trange
 
 def export_to_csv(new_column: list, column_name: str, file_name: str = "output.csv") -> None:
     """Add or create a column in an existing CSV file."""
@@ -56,7 +56,7 @@ def simulate(banner_type: str, n_sample: int, n_rate_up: int, m_rate_up: int = 0
 
     # Simulate
     results = []
-    for _ in range(n_sample):
+    for _ in trange(n_sample):
         if isinstance(b, SpecialBanner):
             results.append(b.pull_n_desired(n_rate_up)[-1])
         else:
@@ -88,7 +88,7 @@ if __name__ == '__main__':
     random.seed(123)
     banner_types = ["Special banner", "Limited banner", "Standard banner"]
 
-    sample = 10000
+    sample = 100000
     n = 1  # number of main operators
     m = 0  # number of peipao operators
     ###########################################
