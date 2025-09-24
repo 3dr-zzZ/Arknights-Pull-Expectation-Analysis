@@ -3,22 +3,20 @@ import time
 
 import pandas as pd
 
-from banner import Banner
-from special_banner import SpecialBanner
-from limited_banner import LimitedBanner
-from standard_banner import StandardBanner
-from summary import summarize
+from banners.special_banner import SpecialBanner
+from banners.limited_banner import LimitedBanner
+from banners.standard_banner import StandardBanner
 from tqdm import trange
 
 
 ############### Basic Setup ###############
 random.seed(123)
 banner_types = ["SpecialBanner", "LimitedBanner", "StandardBanner"]  # 支持的卡池种类，请勿修改
-banner_to_simulate = banner_types[0]  # 选择模拟的卡池
+banner_to_simulate = banner_types[2]  # 选择模拟的卡池
 
 sample = 100000
 n = 6  # number of main operators
-m = 0  # number of peipao operators
+m = 6  # number of peipao operators
 ###########################################
 
 

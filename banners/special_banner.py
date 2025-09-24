@@ -1,5 +1,5 @@
 import random
-from banner import Banner
+from banners.banner import Banner
 
 class SpecialBanner(Banner):
     """A class for the Special Banner.
