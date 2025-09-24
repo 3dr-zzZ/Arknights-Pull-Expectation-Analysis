@@ -1,0 +1,6 @@
+simulation,min,max,mean,median,p10,p25,p75,p90
+StandardBanner: 0+1,1,364,69,57,11,29,92,142
+StandardBanner: 1+0,1,368,69,57,11,29,92,142
+StandardBanner: 6+0,54,1307,413,399,251,318,491,590
+StandardBanner: 0+6,52,1323,412,399,252,318,491,588
+StandardBanner: 6+6,147,1323,501,487,364,419,567,656

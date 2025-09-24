@@ -1,0 +1,6 @@
+simulation,min,max,mean,median,p10,p25,p75,p90
+LimitedBanner: 1+1,2,986,145,126,55,82,191,272
+LimitedBanner: 1+0,1,300,96,70,16,42,131,212
+LimitedBanner: 6+0,50,1736,500,467,300,353,606,753
+LimitedBanner: 6+6,205,1950,678,651,458,542,785,931
+LimitedBanner: 0+6,52,2022,594,565,343,439,719,878
