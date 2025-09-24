@@ -17,7 +17,7 @@ banner_types = ["SpecialBanner", "LimitedBanner", "StandardBanner"]  # 支持的
 banner_to_simulate = banner_types[0]  # 选择模拟的卡池
 
 sample = 100000
-n = 1  # number of main operators
+n = 6  # number of main operators
 m = 0  # number of peipao operators
 ###########################################
 
@@ -58,7 +58,7 @@ def simulate(banner_type: str, num_sample: int, n_rate_up: int, m_rate_up: int =
         b = StandardBanner()
         print(f"开始模拟「标准寻访」，抽取至少「{n_rate_up}」个进店干员、「{m_rate_up}」个陪跑干员，样本量：{num_sample}")
     else:
-        raise ValueError(f"模拟的卡池{b}不支持")
+        raise ValueError(f"模拟的卡池{banner_type}不支持")
 
     # Simulate
     results = []
@@ -94,12 +94,11 @@ if __name__ == '__main__':
                       n_rate_up=n, m_rate_up=m,
                       to_csv=True, file_path=f"simulations/{banner_to_simulate}.csv")
 
-    print()
-    n_pulls = 46
+    # n_pulls = 46
     # print(f"在所有样本中，{n_pulls}抽以内占：", find_percentile(result, n_pulls) * 100, "%")
 
-    print("\n统计数据：")
-    summarize(result)
+    # print("\n统计数据：")
+    # summarize(result)
     # plot_histogram(result)
 
     # for i in range(6):
