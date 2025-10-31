@@ -1,7 +1,0 @@
-simulation,min,max,mean,median,p10,p25,p75,p90
-gap_between_6star,1,78,34,34,6,14,55,60
-LimitedBanner(6+0),111,2001,588,561,341,433,711,870
-SpecialBanner(6),73,1096,399,388,247,310,472,561
-SpecialBanner(1),1,218,66,57,11,29,92,141
-LimitedBanner(1+0),1,865,98,71,16,44,130,206
-StandardBanner(1+0),1,350,69,57,11,29,92,141
