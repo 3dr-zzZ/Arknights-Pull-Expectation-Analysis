@@ -61,4 +61,4 @@ def summarize_results(input_file: str = "sample_output.csv", output_file: str = 
 
 
 if __name__ == "__main__":
-    summarize_results(input_file="sample_output.csv", output_file="sample_summary.csv")
+    summarize_results(input_file="simulations/StandardBanner.csv", output_file="summaries/StandardBanner.csv")

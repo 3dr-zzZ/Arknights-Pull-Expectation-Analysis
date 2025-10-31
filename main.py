@@ -8,7 +8,7 @@ from banners.limited_banner import LimitedBanner
 from banners.standard_banner import StandardBanner
 from tqdm import trange
 
-
+# TODO: 重新生成sample中的数据
 ############### Basic Setup ###############
 random.seed(123)
 banner_types = ["SpecialBanner", "LimitedBanner", "StandardBanner"]  # 支持的卡池种类，请勿修改
